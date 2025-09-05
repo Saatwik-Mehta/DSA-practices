@@ -7,7 +7,7 @@ class Solution:
     Meeting Rooms
 
     Time Complexity: O(n log n)
-    Space Complexity: O(1) but worst case can be O(n)
+    Space Complexity: O(n), due to the creation of new array
     
     This Algorithm can further be enhanced/evolved to answer most of the questions regarding Meeting Rooms, such as:
     - What's the maximum number of concurrent meetings?
@@ -26,20 +26,16 @@ class Solution:
       - https://www.youtube.com/watch?v=yuws7YK0Yng - ALGOSCANIO
       
    """
-    def canAttendMeetings(self, nums: List):
+    
+    def create_meeting_interval_events(self, nums: List):
         """
-        How it works?
-        Each interval is like an event happening at a particular time. 
-        Starting of the meeting is an event, ending of the meeting is an event. 
-        So, we collect these events in an array along with a delta denoting the value (+/-1) that shows whether the event has ended/started,
-        then the array is sorted based on the time and delta, that represents when a meeting is starting,
-        when it is ending and if any meeting is starting at the same-time as one ended.
-        After the sorting, we can easily count the number of meetings happening at the same time or whether a person will be able to attend all the meetings.
+        This method creates an array of events of intervals. An interval consists of start and end time of a meeting, while an event 
+        consists of start-time of a meeting. This is further used to answer many of the problems put forward such as 
+        - how many rooms will be required for the meetings
+        - whether a person can attend all the meetings etc.
         """
         #  Stores the events occuring, such as starting of the meeting is an event. 
         events = []
-        active_meetings = 0
-        
         for interval in nums:
             #  Insert start and end time of the meeting as an event occuring.
         
@@ -53,12 +49,46 @@ class Solution:
         # This is because a meeting started and ending at the same time,
         # will have the meeting ended first and then the starting of the new meeting.
         events.sort(key=lambda x: (x[0], x[1]))
+        return events
 
+    def canAttendMeetings(self, nums: List):
+        """
+        How it works?
+        Each interval is like an event happening at a particular time. 
+        Starting of the meeting is an event, ending of the meeting is an event. 
+        So, we collect these events in an array along with a delta denoting the value (+/-1) that shows whether the event has ended/started,
+        then the array is sorted based on the time and delta, that represents when a meeting is starting,
+        when it is ending and if any meeting is starting at the same-time as one ended.
+        After the sorting, we can easily count the number of meetings happening at the same time or whether a person will be able to attend all the meetings.
+        """
+
+        active_meetings = 0
+        events = self.create_meeting_interval_events(nums)
         for _, delta in events:
             if (active_meetings:=  active_meetings + delta) > 1:
                 return False
         return True
+    
+    def maxRoomsRequired(self, nums):
+        """
+        Problem: https://leetcode.com/problems/meeting-rooms-ii/description/
+        Meeting Rooms II
 
+        You are given an array of meeting time intervals consisting of start and end times.
+        Find the minimum number of conference rooms required so that all meetings can take place without overlap.
+
+        Time Complexity: O(n log n)
+        Space Complexity: O(n) due to the creation of new array
+        """
+        events = self.create_meeting_interval_events(nums)
+        active_meetings = 0
+        rooms_needed = 0
+
+        # We need to know the maximum number of active meetings at a particular time and this is what will be the room requirement as well.
+        for _, delta in events: 
+            if (active_meetings:= active_meetings + delta) > rooms_needed:
+                rooms_needed = active_meetings
+        return rooms_needed
 
 
                 
@@ -80,5 +110,7 @@ testcases = [
               
 for i, ts in enumerate(testcases):                
     print(f"{i+1} testcase O/P: ", Solution().canAttendMeetings(ts))
+    print(f"{i+1} testcase O/P=> Max Room required: ", Solution().maxRoomsRequired(ts))
+
 
             
